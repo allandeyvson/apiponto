@@ -139,7 +139,7 @@ public class PontoService {
 		case MONDAY:
 			//horas +=0;
 			break;
-		default:			
+		default:		
 			break;
 		}
 		return segundosTrabalhados;

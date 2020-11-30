@@ -14,7 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class HttpBasicConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.csrf().disable().authorizeRequests().anyRequest().authenticated().and().httpBasic();
+		httpSecurity.csrf().disable()
+			.authorizeRequests()
+			.antMatchers("/api/**").authenticated().and().httpBasic();
 
 	}
 }
