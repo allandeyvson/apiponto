@@ -55,6 +55,18 @@ public class PontoService {
 		Map<LocalDate, List<Ponto>> mapaDiaPonto = pontoRepository.findByUsuarioId(id).stream()
 				.collect(Collectors.groupingBy(Ponto::getData));
 
+		agrupaMontaPontosDiarios(pontosDiarios, mapaDiaPonto);
+
+		return pontosDiarios;
+	}
+	
+	/**
+	 * Método responsavel pela estruturacao dos dados exibidos ao usuario.
+	 * @param pontosDiarios
+	 * @param mapaDiaPonto
+	 */
+	private void agrupaMontaPontosDiarios(List<PontoDiarioDto> pontosDiarios,
+			Map<LocalDate, List<Ponto>> mapaDiaPonto) {
 		mapaDiaPonto.entrySet().forEach(item -> {
 			PontoDiarioDto pontoDiario = new PontoDiarioDto();
 
@@ -72,8 +84,6 @@ public class PontoService {
 
 			pontosDiarios.add(pontoDiario);
 		});
-
-		return pontosDiarios;
 	}
 
 	/**

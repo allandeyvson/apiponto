@@ -15,7 +15,11 @@ import br.com.pontoeltronico.apiponto.dto.PontoDto;
 import br.com.pontoeltronico.apiponto.dto.response.Response;
 import br.com.pontoeltronico.apiponto.exception.ApiRNException;
 import br.com.pontoeltronico.apiponto.service.PontoService;
-
+/**
+ * Controlador responsavel por prover o acesso a registro de ponto e suas funcionalidades.
+ * @author allan
+ *
+ */
 @RestController
 @RequestMapping("/api/ponto")
 public class PontoController {
