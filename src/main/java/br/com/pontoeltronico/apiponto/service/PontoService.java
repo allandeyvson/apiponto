@@ -1,9 +1,11 @@
 package br.com.pontoeltronico.apiponto.service;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,11 @@ public class PontoService {
 	private UsuarioRepository usuarioRepository;
 
 	private static Logger logger = LoggerFactory.getLogger(PontoService.class);
+	
+	/**
+	 * Limite de intervalo para registro de ponto (dada em segundos)
+	 */
+	private static final int LIMITE_DE_TEMPO_REGISTRO = 60;
 
 	/**
 	 * Retorna uma lista de pontos contendo informacoes sobre a quantidade de horas
@@ -79,8 +86,8 @@ public class PontoService {
 				return itemDto;
 			}).collect(Collectors.toList()));
 
-			Long horasTrabalhadas = calculaHorasTrabalhadas(pontoDiario);
-			pontoDiario.setHorasTrabalhadas(LocalTime.ofSecondOfDay(horasTrabalhadas).toString());
+			Long tempoTrabalhado = calculaTempoTrabalhado(pontoDiario);
+			pontoDiario.setHorasTrabalhadas(LocalTime.ofSecondOfDay(tempoTrabalhado).toString());
 
 			pontosDiarios.add(pontoDiario);
 		});
@@ -92,7 +99,7 @@ public class PontoService {
 	 * @param pontoDiario
 	 * @return
 	 */
-	private Long calculaHorasTrabalhadas(PontoDiarioDto pontoDiario) {
+	private Long calculaTempoTrabalhado(PontoDiarioDto pontoDiario) {
 		List<PontoDto> pontosDto = pontoDiario.getPontos();
 		Long horas = 0L;
 
@@ -102,8 +109,7 @@ public class PontoService {
 				try {
 					PontoDto pontoSaida = pontosDto.get(i + 1);
 					if (pontoSaida.getTipo().equals(TipoPonto.SAIDA)) {
-						Duration duration = Duration.between(pontoEntrada.getHorario(),pontoSaida.getHorario());
-						horas+=duration.getSeconds();
+						horas += calcularTempoProporcinal(pontoEntrada, pontoSaida);
 					}
 				} catch (IndexOutOfBoundsException e) {
 					// TODO: handle exception
@@ -111,6 +117,32 @@ public class PontoService {
 			}
 		}
 		return horas;
+	}
+	
+	/**
+	 * Calcula a quantidade de horas trabalhadas de acordo com regra:
+	  	1) De segunda a sexta feira a cada 60 minutos trabalhados são contabilizados 60 minutos.
+		2) Aos sábados a cada 60 minutos trabalhados são contabilizados 90 minutos.
+		3) Aos domingos a cada 60 minutos trabalhados são contabilizados 120 minutos.
+		4) Para trabalho realizado entre as 22:00 e 06:00 a cada 60 minutos trabalhados são contabilizados 72 minutos.
+	 * @param pontoEntrada
+	 * @param pontoSaida
+	 * @return
+	 */
+	private Long calcularTempoProporcinal(PontoDto pontoEntrada, PontoDto pontoSaida) {
+		Duration duration = Duration.between(pontoEntrada.getHorario(),pontoSaida.getHorario());
+		Long segundosTrabalhados = duration.getSeconds();		
+		switch (pontoEntrada.getHorario().getDayOfWeek()) {
+		case SATURDAY:
+			//horas += 0;
+			break;
+		case MONDAY:
+			//horas +=0;
+			break;
+		default:			
+			break;
+		}
+		return segundosTrabalhados;
 	}
 
 	/**
@@ -155,7 +187,7 @@ public class PontoService {
 	 */
 	private void verficaTempoMinimoRegistro(Ponto ultimoPonto) throws ApiRNException {
 
-		if (LocalDateTime.now().minusSeconds(60).isBefore(ultimoPonto.getHorario())) {
+		if (LocalDateTime.now().minusSeconds(LIMITE_DE_TEMPO_REGISTRO).isBefore(ultimoPonto.getHorario())) {
 			throw new ApiRNException("Nao é permitido registrar batida de ponto com menos de 1min de intervalo.");
 		}
 
