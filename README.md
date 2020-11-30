@@ -2,13 +2,13 @@ Api para registro/consulta de ponto eletrônico
 
 Gestão de usuários
 
-GET - /usuario
+GET - /api/usuario
 Lista de todos os usuários cadastrados.
 
-GET - /usuario/{id}
+GET - /api/usuario/{id}
 Detalha um usuário com o identificador passado como parâmetro.
 
-POST - /usuario
+POST - /api/usuario
 Cria um novo usuário de acordo com os dados informados no corpo da requisição.
 
 ```
@@ -23,7 +23,7 @@ Cria um novo usuário de acordo com os dados informados no corpo da requisição
 
 Registro de ponto
 
-GET - /ponto
+GET - /api/ponto
 
 Listagem agrupada por dia de todos registros de ponto de um usuario, bem como a quantidade de horas trabalhadas.
 O identificador do usuário é obtido atráves do Header da requisição (idUsuario).
@@ -49,7 +49,7 @@ O identificador do usuário é obtido atráves do Header da requisição (idUsua
 ]
 ```
 
-POST - /ponto
+POST - /api/ponto
 
 Registro de ponto de um determinado usuário (Entrada ou Saída).
 
