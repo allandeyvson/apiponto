@@ -1,5 +1,7 @@
 Api para registro/consulta de ponto eletrônico
 
+A api possui autenticação via httpbasic, estando suas credenciais de acesso configuradas no application.properties.
+
 Gestão de usuários
 
 GET - /api/usuario
