@@ -15,6 +15,7 @@ import br.com.pontoeltronico.apiponto.dto.PontoDto;
 import br.com.pontoeltronico.apiponto.dto.response.Response;
 import br.com.pontoeltronico.apiponto.exception.ApiRNException;
 import br.com.pontoeltronico.apiponto.service.PontoService;
+import br.com.pontoeltronico.apiponto.strategy.EstrategiaContablizaHorasLife;
 /**
  * Controlador responsavel por prover o acesso a registro de ponto e suas funcionalidades.
  * @author allan
@@ -28,7 +29,8 @@ public class PontoController {
 	private PontoService pontoService;
 	
 	@GetMapping
-	public ResponseEntity<List<PontoDiarioDto>> listar(@RequestHeader Long idUsuario){		
+	public ResponseEntity<List<PontoDiarioDto>> listar(@RequestHeader Long idUsuario){
+		pontoService.setEstrategia(new EstrategiaContablizaHorasLife());
 		List<PontoDiarioDto> pontosDiarios = pontoService.buscarPontos(idUsuario);		
 		return ResponseEntity.ok().body(pontosDiarios);
 	}

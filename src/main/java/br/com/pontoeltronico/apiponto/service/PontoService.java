@@ -1,11 +1,7 @@
 package br.com.pontoeltronico.apiponto.service;
 
-import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +21,7 @@ import br.com.pontoeltronico.apiponto.models.TipoPonto;
 import br.com.pontoeltronico.apiponto.models.Usuario;
 import br.com.pontoeltronico.apiponto.repository.PontoRepository;
 import br.com.pontoeltronico.apiponto.repository.UsuarioRepository;
+import br.com.pontoeltronico.apiponto.strategy.EstrategiaContabilizaHoras;
 
 /**
  * Servico para prover a metodos de manipulacao de dados referentes aos
@@ -43,6 +40,11 @@ public class PontoService {
 	private UsuarioRepository usuarioRepository;
 
 	private static Logger logger = LoggerFactory.getLogger(PontoService.class);
+	
+	/**
+	 * Estrategia utilizada para contabilizar as horas trabalhadas.
+	 */
+	private EstrategiaContabilizaHoras estrategia;
 	
 	/**
 	 * Limite de intervalo para registro de ponto (dada em segundos)
@@ -86,64 +88,13 @@ public class PontoService {
 				return itemDto;
 			}).collect(Collectors.toList()));
 
-			Long tempoTrabalhado = calculaTempoTrabalhado(pontoDiario);
-			pontoDiario.setHorasTrabalhadas(LocalTime.ofSecondOfDay(tempoTrabalhado).toString());
+			Long tempoTrabalhado = estrategia.calculaTempoTrabalhado(pontoDiario);
+			pontoDiario.setHorasTrabalhadas(estrategia.formataTempoTrabalhado(tempoTrabalhado));
 
 			pontosDiarios.add(pontoDiario);
 		});
 	}
 
-	/**
-	 * Método que calcula as horas trabalhadas em determinado período.
-	 * 
-	 * @param pontoDiario
-	 * @return
-	 */
-	private Long calculaTempoTrabalhado(PontoDiarioDto pontoDiario) {
-		List<PontoDto> pontosDto = pontoDiario.getPontos();
-		Long horas = 0L;
-
-		for (int i = 0; i < pontosDto.size(); i++) {
-			PontoDto pontoEntrada = pontosDto.get(i);
-			if (pontoEntrada.getTipo().equals(TipoPonto.ENTRADA)) {
-				try {
-					PontoDto pontoSaida = pontosDto.get(i + 1);
-					if (pontoSaida.getTipo().equals(TipoPonto.SAIDA)) {
-						horas += calcularTempoProporcinal(pontoEntrada, pontoSaida);
-					}
-				} catch (IndexOutOfBoundsException e) {
-					// TODO: handle exception
-				}
-			}
-		}
-		return horas;
-	}
-	
-	/**
-	 * Calcula a quantidade de horas trabalhadas de acordo com regra:
-	  	1) De segunda a sexta feira a cada 60 minutos trabalhados são contabilizados 60 minutos.
-		2) Aos sábados a cada 60 minutos trabalhados são contabilizados 90 minutos.
-		3) Aos domingos a cada 60 minutos trabalhados são contabilizados 120 minutos.
-		4) Para trabalho realizado entre as 22:00 e 06:00 a cada 60 minutos trabalhados são contabilizados 72 minutos.
-	 * @param pontoEntrada
-	 * @param pontoSaida
-	 * @return
-	 */
-	private Long calcularTempoProporcinal(PontoDto pontoEntrada, PontoDto pontoSaida) {
-		Duration duration = Duration.between(pontoEntrada.getHorario(),pontoSaida.getHorario());
-		Long segundosTrabalhados = duration.getSeconds();		
-		switch (pontoEntrada.getHorario().getDayOfWeek()) {
-		case SATURDAY:
-			//horas += 0;
-			break;
-		case MONDAY:
-			//horas +=0;
-			break;
-		default:		
-			break;
-		}
-		return segundosTrabalhados;
-	}
 
 	/**
 	 * Registra o ponto do usuario repassado.
@@ -157,10 +108,15 @@ public class PontoService {
 			throw new ApiRNException("Usuario não cadastrado na api.");
 		}
 
-		Ponto ponto = new Ponto();
-		ponto.setUsuario(usuario.get());
+		Ponto ponto = definePontoEntradaOuSaida(usuario.get());
+		
+		ponto = pontoRepository.save(ponto);
+		return modelToDto(ponto);
+	}
 
-		Optional<List<Ponto>> pontosHoje = pontoRepository.findByDataAndUsuarioId(LocalDate.now(), id);
+	private Ponto definePontoEntradaOuSaida(Usuario usuario) throws ApiRNException {
+		Ponto ponto = new Ponto();
+		Optional<List<Ponto>> pontosHoje = pontoRepository.findByDataAndUsuarioId(LocalDate.now(), usuario.getId());
 		if (pontosHoje.isPresent()) {
 			Ponto ultimoPonto = pontosHoje.get().get(pontosHoje.get().size() - 1);
 
@@ -173,9 +129,8 @@ public class PontoService {
 		} else {
 			ponto.setTipo(TipoPonto.ENTRADA);
 		}
-
-		ponto = pontoRepository.save(ponto);
-		return modelToDto(ponto);
+		ponto.setUsuario(usuario);
+		return ponto;
 	}
 
 	/**
@@ -201,4 +156,11 @@ public class PontoService {
 		return dto;
 	}
 
+	public EstrategiaContabilizaHoras getEstrategia() {
+		return estrategia;
+	}
+
+	public void setEstrategia(EstrategiaContabilizaHoras estrategia) {
+		this.estrategia = estrategia;
+	}
 }
