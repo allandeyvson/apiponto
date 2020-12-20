@@ -1,7 +1,6 @@
 package br.com.pontoeltronico.apiponto.models;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -11,10 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
 
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.validator.constraints.UniqueElements;
 /**
  * Classe que representa um usuario da api.
  * 
@@ -31,9 +29,11 @@ public class Usuario implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	
+	@NotEmpty(message = "O campo Nome não pode ser vazio.")
 	private String nome;
 	
 	@Column(nullable = false, unique = true)
+	@NotEmpty(message = "O campo PIS não pode ser vazio.")
 	private String pis;
 	
 	private Date dataCadastro;
@@ -84,5 +84,10 @@ public class Usuario implements Serializable{
 	@PrePersist
 	protected void onCreate() {
 		dataCadastro = new Date();
+	}
+
+	@Override
+	public String toString() {
+		return "Usuario [id=" + id + ", nome=" + nome + ", pis=" + pis + ", dataCadastro=" + dataCadastro + "]";
 	}
 }

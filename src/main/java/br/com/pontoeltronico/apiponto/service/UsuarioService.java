@@ -55,16 +55,16 @@ public class UsuarioService {
 		return modelToDto(usuario);
 	}
 	
-	public UsuarioDto findById(long id) throws ApiRNException {
-		Optional<Usuario> model = usuarioRepository.findById(id);
+	public Optional<UsuarioDto> buscaUsuario(long id){
+		Optional<Usuario> model = usuarioRepository.findById(id);		
 		if (model.isPresent()) {
-			return modelToDto(model.get());
+			return Optional.of(modelToDto(model.get()));
 		} else {
-			throw new ApiRNException("Usuario não cadastrado na api.");
+			return Optional.empty();
 		}
 	}
 	
-	public List<UsuarioDto> findAll(){
+	public List<UsuarioDto> buscaTodosUsuarios(){
 		List<Usuario> usuarios = usuarioRepository.findAll();
 		return usuarios.stream().map(u -> modelToDto(u)).collect(Collectors.toList());
 	}
