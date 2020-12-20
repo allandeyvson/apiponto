@@ -46,7 +46,7 @@ public class UsuarioService {
 		usuario.setId(model.getId());
 		usuario.setNome(model.getNome());
 		usuario.setPis(model.getPis());
-		usuario.setDataCdastro(model.getDataCadastro());
+		usuario.setDataCadastro(model.getDataCadastro());
 		return usuario;
 	}
 	

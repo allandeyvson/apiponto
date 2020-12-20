@@ -2,6 +2,8 @@ package br.com.pontoeltronico.apiponto.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.pontoeltronico.apiponto.dto.UsuarioDto;
-import br.com.pontoeltronico.apiponto.exception.ApiRNException;
 import br.com.pontoeltronico.apiponto.service.UsuarioService;
 /**
  * Controller responsavel por prover o endpoint para manipulacao dos dados de usuario
@@ -39,7 +40,7 @@ public class UsuarioController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<UsuarioDto> criar(@RequestBody UsuarioDto dto){
+	public ResponseEntity<UsuarioDto> criar(@RequestBody @Valid UsuarioDto dto){
 		UsuarioDto usuario = usuarioService.save(dto);
 		return new ResponseEntity<UsuarioDto>(usuario, HttpStatus.CREATED);
 	}

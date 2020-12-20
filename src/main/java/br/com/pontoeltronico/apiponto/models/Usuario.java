@@ -1,7 +1,7 @@
 package br.com.pontoeltronico.apiponto.models;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
-
-import org.hibernate.validator.constraints.UniqueElements;
 /**
  * Classe que representa um usuario da api.
  * 
@@ -36,7 +34,8 @@ public class Usuario implements Serializable{
 	@NotEmpty(message = "O campo PIS não pode ser vazio.")
 	private String pis;
 	
-	private Date dataCadastro;
+	@Column(columnDefinition = "DATE")
+	private LocalDate dataCadastro;
 	
 	public Usuario() {
 		
@@ -73,17 +72,17 @@ public class Usuario implements Serializable{
 		this.pis = pis;
 	}
 
-	public Date getDataCadastro() {
+	public LocalDate getDataCadastro() {
 		return dataCadastro;
 	}
 
-	public void setDataCadastro(Date dataCadastro) {
+	public void setDataCadastro(LocalDate dataCadastro) {
 		this.dataCadastro = dataCadastro;
 	}
 	
 	@PrePersist
 	protected void onCreate() {
-		dataCadastro = new Date();
+		dataCadastro = LocalDate.now();
 	}
 
 	@Override

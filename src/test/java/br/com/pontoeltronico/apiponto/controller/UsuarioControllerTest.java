@@ -1,6 +1,6 @@
 package br.com.pontoeltronico.apiponto.controller;
 
-import java.util.Base64;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,13 +40,12 @@ class UsuarioControllerTest {
 
 	private HttpEntity<String> request;
 
+	private HttpHeaders hearder;
+
 	@BeforeEach
 	public void setUp() {
-		HttpHeaders hearder = new HttpHeaders();
-		String auth = new String(userName.concat(":").concat(password));
-		byte[] authBytes = auth.getBytes();
-		String authBase64 = Base64.getEncoder().encodeToString(authBytes);
-		hearder.add("Authorization", "Basic ".concat(authBase64));
+		hearder = new HttpHeaders();
+		hearder.setBasicAuth(userName, password);		
 		request = new HttpEntity<String>(hearder);
 
 	}
@@ -86,13 +85,41 @@ class UsuarioControllerTest {
 	
 	@Test
 	public void buscaUsuarioDeveRetornarStatus404() {
-		ParameterizedTypeReference<UsuarioDto> tipoRetorno = new ParameterizedTypeReference<UsuarioDto>() {
-		};
-
+		ParameterizedTypeReference<UsuarioDto> tipoRetorno = new ParameterizedTypeReference<UsuarioDto>() {};
+		Integer idUsuarioBuscado = 100;
+		
 		ResponseEntity<UsuarioDto> resposta = testRestTemplate.exchange("/api/usuario/{id}", HttpMethod.GET, request,
-				tipoRetorno, 100);
+				tipoRetorno, idUsuarioBuscado);
 		
 		Assertions.assertNull(resposta.getBody());
 		Assertions.assertEquals(HttpStatus.NOT_FOUND, resposta.getStatusCode());
+	}
+	
+	@Test
+	public void criarUsuarioDeveRetornarStatus201() {
+		UsuarioDto usuarioDto = new UsuarioDto("Usuario 01", "123456789");
+		HttpEntity<UsuarioDto> httpEntity = new HttpEntity<UsuarioDto>(usuarioDto, hearder);
+		
+		ResponseEntity<UsuarioDto> resposta = testRestTemplate.postForEntity("/api/usuario/", httpEntity, UsuarioDto.class);
+		UsuarioDto respostaUsuario = resposta.getBody();
+		
+		Assertions.assertNotNull(respostaUsuario.getId());
+		Assertions.assertEquals(usuarioDto.getNome(), respostaUsuario.getNome());
+		Assertions.assertEquals(usuarioDto.getPis(), respostaUsuario.getPis());
+		Assertions.assertTrue(respostaUsuario.getDataCadastro().equals(LocalDate.now()));
+		Assertions.assertEquals(HttpStatus.CREATED, resposta.getStatusCode());
+	}
+	
+	@Test
+	public void criarUsuarioDeveRetornarMsgDeErroAndStatus201() {
+		UsuarioDto usuarioDto = new UsuarioDto(null, null);
+		HttpEntity<UsuarioDto> httpEntity = new HttpEntity<UsuarioDto>(usuarioDto, hearder);
+		
+		ResponseEntity<List<String>> resposta = testRestTemplate.exchange("/api/usuario/", HttpMethod.POST, httpEntity, 
+				new ParameterizedTypeReference<List<String>>(){});	
+		
+		Assertions.assertTrue(resposta.getBody().contains("O campo Nome não pode ser vazio."));
+		Assertions.assertTrue(resposta.getBody().contains("O campo PIS não pode ser vazio."));		
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, resposta.getStatusCode());
 	}
 }

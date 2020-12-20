@@ -1,6 +1,9 @@
 package br.com.pontoeltronico.apiponto.dto;
 
+import java.time.LocalDate;
 import java.util.Date;
+
+import javax.validation.constraints.NotEmpty;
 
 import br.com.pontoeltronico.apiponto.models.Usuario;
 
@@ -13,11 +16,23 @@ public class UsuarioDto {
 	
 	private long id;
 	
+	@NotEmpty(message = "O campo Nome não pode ser vazio.")
 	private String nome;
 	
+	@NotEmpty(message = "O campo PIS não pode ser vazio.")
 	private String pis;
 	
-	private Date dataCdastro;
+	private LocalDate dataCadastro;
+	
+	public UsuarioDto() {
+		
+	}
+
+	public UsuarioDto(String nome, String pis) {
+		super();
+		this.nome = nome;
+		this.pis = pis;
+	}
 
 	public long getId() {
 		return id;
@@ -43,11 +58,11 @@ public class UsuarioDto {
 		this.pis = pis;
 	}
 
-	public Date getDataCdastro() {
-		return dataCdastro;
+	public LocalDate getDataCadastro() {
+		return dataCadastro;
 	}
 
-	public void setDataCdastro(Date dataCdastro) {
-		this.dataCdastro = dataCdastro;
+	public void setDataCadastro(LocalDate dataCdastro) {
+		this.dataCadastro = dataCdastro;
 	}
 }
