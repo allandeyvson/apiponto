@@ -3,6 +3,7 @@ package br.com.pontoeltronico.apiponto.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.pontoeltronico.apiponto.dto.PontoDiarioDto;
 import br.com.pontoeltronico.apiponto.dto.PontoDto;
-import br.com.pontoeltronico.apiponto.dto.response.Response;
 import br.com.pontoeltronico.apiponto.exception.ApiRNException;
 import br.com.pontoeltronico.apiponto.service.PontoService;
 import br.com.pontoeltronico.apiponto.strategy.EstrategiaContablizaHorasLife;
@@ -36,12 +36,8 @@ public class PontoController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Response<PontoDto>> registrar(@RequestHeader Long idUsuario) throws ApiRNException{
-		Response<PontoDto> response = new Response<PontoDto>();
-		
-		PontoDto dto = pontoService.registrarPonto(idUsuario);
-		response.setData(dto);
-		
-		return ResponseEntity.ok().body(response);
+	public ResponseEntity<PontoDto> registrar(@RequestHeader Long idUsuario) throws ApiRNException{
+		PontoDto pontoDto = pontoService.registrarPonto(idUsuario);		
+		return new ResponseEntity<PontoDto>(pontoDto, HttpStatus.CREATED);
 	}
 }
