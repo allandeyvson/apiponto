@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.pontoeltronico.apiponto.dto.UsuarioDto;
 import br.com.pontoeltronico.apiponto.service.UsuarioService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 /**
  * Controller responsavel por prover o endpoint para manipulacao dos dados de usuario
  * @author allan
@@ -23,11 +25,13 @@ import br.com.pontoeltronico.apiponto.service.UsuarioService;
  */
 @RestController
 @RequestMapping("/api/usuario")
+@Api(value = "usuario")
 public class UsuarioController {
 	
 	@Autowired
 	private UsuarioService usuarioService;
 	
+	@ApiOperation(value = "Retorna todos os usuarios da api")
 	@GetMapping
 	public ResponseEntity<List<UsuarioDto>> listarTodos(){		
 		List<UsuarioDto> usuarios = usuarioService.buscaTodosUsuarios();
