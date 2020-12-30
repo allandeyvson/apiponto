@@ -18,7 +18,7 @@ import br.com.pontoeltronico.apiponto.models.TipoPonto;
  * <br>
  * 3) Aos domingos a cada 60 minutos trabalhados são contabilizados 120 minutos.
  * <br>
- * 4) Para trabalho realizado entre as 22:00 e 06:00 a cada 60 minutos trabalhados são contabilizados 72 minutos.
+ * 4) Para trabalho realizado entre as 22:00 e 06:00 a cada 60 minutos trabalhados são contabilizados 72 minutos. <b>[TO DO]</b>
  * <br>
  * 
  * @author allan
